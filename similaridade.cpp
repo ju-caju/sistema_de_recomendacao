@@ -65,7 +65,7 @@ std::vector<std::vector<double> > calcularMatrizSimilaridade(const std::vector<s
     return S;
 }
 
-int encontrarSimilaridade(int cliente_idx, const std::vector<std::vector<double> > &S) {
+int encontrarSimilar(int cliente_idx, const std::vector<std::vector<double> > &S) {
     int n_clientes = S.size();
     double menor_distancia = 2.0; 
     int vizinho_mais_similar = -1;
