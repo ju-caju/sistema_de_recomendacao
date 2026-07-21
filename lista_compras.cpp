@@ -5,11 +5,28 @@
 #include <cstdio>
 
 static std::string removerEspacos(const std::string &texto) {
-    size_t inicio = texto.find_first_not_of(" \t\r\n");
-    size_t fim = texto.find_last_not_of(" \t\r\n");
-
-    if (inicio == std::string::npos) {
+    if (texto.empty()) {
         return "";
+    }
+
+    size_t inicio = 0;
+    
+    while (inicio < texto.size() && 
+          (texto[inicio] == ' ' || texto[inicio] == '\t' || 
+           texto[inicio] == '\r' || texto[inicio] == '\n')) {
+        inicio++;
+    }
+
+    if (inicio == texto.size()) {
+        return "";
+    }
+
+    size_t fim = texto.size() - 1;
+
+    while (fim > inicio && 
+          (texto[fim] == ' ' || texto[fim] == '\t' || 
+           texto[fim] == '\r' || texto[fim] == '\n')) {
+        fim--;
     }
 
     return texto.substr(inicio, fim - inicio + 1);
@@ -82,8 +99,14 @@ bool carregarListaCompras(ListaCompras &lista, const char *caminho_arquivo) {
         return false;
     }
 
-    char separador = strchr(linha, ';') != NULL ? ';' : ',';
+    char separador = ','; 
 
+    for (int i = 0; linha[i] != '\0'; i++) {
+        if (linha[i] == ';') {
+            separador = ';'; 
+            break;          
+    }
+}
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
         std::vector<std::string> campos = separarCampos(linha, separador);
 

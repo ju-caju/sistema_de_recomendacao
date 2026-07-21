@@ -6,13 +6,13 @@
 #include <string>
 #include <vector>
 
-struct ListaCompras {
+typedef struct {
     std::vector<std::string> codigos_clientes;
     std::map<std::string, int> indices_clientes;
     std::vector<std::string> nomes_produtos;
     std::map<std::string, int> indices_produtos;
     std::vector<std::list<int> > compras_clientes;
-};
+} ListaCompras;
 
 bool carregarListaCompras(ListaCompras &lista, const char *caminho_arquivo);
 bool obterIndiceCliente(const ListaCompras &lista, const std::string &codigo_cliente, int &indice_cliente);
