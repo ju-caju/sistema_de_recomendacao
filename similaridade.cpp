@@ -122,6 +122,26 @@ std::vector<std::vector<int> > multiplicarPorTranspostaAdaptado(
     return resultado;
 }
 
+bool construirMatrizIntersecao(
+    const std::vector<std::vector<int> > &matriz_compras,
+    int algoritmo,
+    std::vector<std::vector<int> > &intersecao
+) {
+    if (algoritmo == ALGORITMO_PADRAO) {
+        std::vector<std::vector<int> > transposta = transporMatriz(matriz_compras);
+        intersecao = multiplicarMatrizes(matriz_compras, transposta);
+        return true;
+    }
+
+    if (algoritmo == ALGORITMO_ADAPTADO) {
+        intersecao = multiplicarPorTranspostaAdaptado(matriz_compras);
+        return true;
+    }
+
+    intersecao.clear();
+    return false;
+}
+
 std::vector<std::vector<double> > calcularMatrizSimilaridade(const std::vector<std::vector<int> > &intersecao, const ListaCompras &lista) {
     int n_clientes = intersecao.size();
     std::vector<std::vector<double> > S(n_clientes, std::vector<double>(n_clientes, 0.0));
