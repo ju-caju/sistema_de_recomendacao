@@ -1,51 +1,125 @@
 #include "similaridade.h"
-#include <iostream>
 
 std::vector<std::vector<int> > construirMatrizCompras(const ListaCompras &lista) {
-    int n_clientes = lista.codigos_clientes.size();
-    int n_produtos = lista.nomes_produtos.size();
-    
-    std::vector<std::vector<int> > A(n_clientes, std::vector<int>(n_produtos, 0));
-    
-    for (int i = 0; i < n_clientes; ++i) {
+    return construirMatrizComprasLimitada(lista, (int)lista.codigos_clientes.size());
+}
+
+std::vector<std::vector<int> > construirMatrizComprasLimitada(
+    const ListaCompras &lista,
+    int limite_clientes
+) {
+    int total_clientes = (int)lista.codigos_clientes.size();
+    int quantidade_clientes;
+    int quantidade_produtos = (int)lista.nomes_produtos.size();
+
+    if (limite_clientes <= 0) {
+        return std::vector<std::vector<int> >();
+    }
+
+    quantidade_clientes = limite_clientes;
+    if (quantidade_clientes > total_clientes) {
+        quantidade_clientes = total_clientes;
+    }
+
+    std::vector<std::vector<int> > matriz(
+        quantidade_clientes,
+        std::vector<int>(quantidade_produtos, 0)
+    );
+
+    for (int i = 0; i < quantidade_clientes; i++) {
         for (std::list<int>::const_iterator it = lista.compras_clientes[i].begin(); 
              it != lista.compras_clientes[i].end(); ++it) {
-            A[i][*it] = 1;
+            matriz[i][*it] = 1;
         }
     }
-    return A;
+
+    return matriz;
 }
 
-std::vector<std::vector<int> > transporMatriz(const std::vector<std::vector<int> > &A) {
-    if (A.empty()) return std::vector<std::vector<int> >();
-    
-    int m = A.size();
-    int n = A[0].size();
-    std::vector<std::vector<int> > T(n, std::vector<int>(m, 0));
-    
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            T[j][i] = A[i][j];
+std::vector<std::vector<int> > transporMatriz(
+    const std::vector<std::vector<int> > &matriz
+) {
+    if (matriz.empty()) {
+        return std::vector<std::vector<int> >();
+    }
+
+    int quantidade_linhas = (int)matriz.size();
+    int quantidade_colunas = (int)matriz[0].size();
+    std::vector<std::vector<int> > transposta(
+        quantidade_colunas,
+        std::vector<int>(quantidade_linhas, 0)
+    );
+
+    for (int i = 0; i < quantidade_linhas; i++) {
+        for (int j = 0; j < quantidade_colunas; j++) {
+            transposta[j][i] = matriz[i][j];
         }
     }
-    return T;
+
+    return transposta;
 }
 
-std::vector<std::vector<int> > multiplicarMatrizes(const std::vector<std::vector<int> > &A, const std::vector<std::vector<int> > &B) {
-    int m = A.size();
-    int n = A[0].size();
-    int p = B[0].size();
-    
-    std::vector<std::vector<int> > C(m, std::vector<int>(p, 0));
-    
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < p; ++j) {
-            for (int k = 0; k < n; ++k) {
-                C[i][j] += A[i][k] * B[k][j];
+std::vector<std::vector<int> > multiplicarMatrizes(
+    const std::vector<std::vector<int> > &matriz_a,
+    const std::vector<std::vector<int> > &matriz_b
+) {
+    if (matriz_a.empty() || matriz_b.empty()) {
+        return std::vector<std::vector<int> >();
+    }
+
+    int linhas_a = (int)matriz_a.size();
+    int colunas_a = (int)matriz_a[0].size();
+    int linhas_b = (int)matriz_b.size();
+    int colunas_b = (int)matriz_b[0].size();
+
+    if (colunas_a != linhas_b) {
+        return std::vector<std::vector<int> >();
+    }
+
+    std::vector<std::vector<int> > resultado(
+        linhas_a,
+        std::vector<int>(colunas_b, 0)
+    );
+
+    for (int i = 0; i < linhas_a; i++) {
+        for (int j = 0; j < colunas_b; j++) {
+            for (int k = 0; k < colunas_a; k++) {
+                resultado[i][j] += matriz_a[i][k] * matriz_b[k][j];
             }
         }
     }
-    return C;
+
+    return resultado;
+}
+
+std::vector<std::vector<int> > multiplicarPorTranspostaAdaptado(
+    const std::vector<std::vector<int> > &matriz
+) {
+    if (matriz.empty()) {
+        return std::vector<std::vector<int> >();
+    }
+
+    int quantidade_linhas = (int)matriz.size();
+    int quantidade_colunas = (int)matriz[0].size();
+    std::vector<std::vector<int> > resultado(
+        quantidade_linhas,
+        std::vector<int>(quantidade_linhas, 0)
+    );
+
+    for (int i = 0; i < quantidade_linhas; i++) {
+        for (int j = i; j < quantidade_linhas; j++) {
+            int soma = 0;
+
+            for (int produto = 0; produto < quantidade_colunas; produto++) {
+                soma += matriz[i][produto] * matriz[j][produto];
+            }
+
+            resultado[i][j] = soma;
+            resultado[j][i] = soma;
+        }
+    }
+
+    return resultado;
 }
 
 std::vector<std::vector<double> > calcularMatrizSimilaridade(const std::vector<std::vector<int> > &intersecao, const ListaCompras &lista) {
