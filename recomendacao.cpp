@@ -2,6 +2,10 @@
 #include <algorithm>
 
 static bool compararPorRank(ProdutoRank a, ProdutoRank b) {
+    if (a.rank == b.rank) {
+        return a.id_produto < b.id_produto;
+    }
+
     return a.rank < b.rank;
 }
 

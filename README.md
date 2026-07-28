@@ -141,7 +141,38 @@ carga do sistema. Em todos os recortes testados, os dois algoritmos produziram
 exatamente a mesma matriz de intersecao e matrizes de similaridade iguais
 dentro da tolerancia.
 
-## Limite desta entrega
+## Atividade 5 - Matrizes esparsas CSR
 
-A Atividade 4 ainda usa matrizes densas. A representacao CSR e a multiplicacao
-de matrizes esparsas pertencem a Atividade 5 e nao fazem parte desta entrega.
+O modulo `csr` representa matrizes esparsas com os tres vetores do formato
+Compressed Sparse Row:
+
+- `values`: valores diferentes de zero;
+- `col_index`: coluna correspondente a cada valor;
+- `row_ptr`: inicio de cada linha em `values`.
+
+As colunas de cada linha sao ordenadas. Assim, o produto interno de duas linhas
+usa dois indices e ignora todos os zeros. A funcao
+`multiplicarCSRPorTransposta()` constroi `A * A^T` diretamente em CSR, sem
+materializar `A^T`.
+
+A matriz densa de distancias tambem nao e criada. `SimilaridadeCSR` armazena a
+matriz CSR de intersecoes e a quantidade de compras de cada cliente.
+`obterSimilaridadeCSR()` calcula uma celula sob demanda; uma intersecao ausente
+representa distancia 1.
+
+Compile e execute o testador:
+
+```bash
+make atividade5
+./bin/atividade5 dados/dados_venda_cluster_1.csv 100 250 500
+```
+
+O testador valida um exemplo conhecido, compara todas as celulas e tambem as
+recomendacoes produzidas pelas abordagens densa e CSR, e mostra o tempo e a
+memoria estimada. Ele constroi a matriz de compras CSR para toda a base, mas
+limita a multiplicacao comparativa aos tamanhos informados para evitar a
+alocacao da matriz densa completa.
+
+O codigo continua procedural: usa recursos da linguagem C e apenas `vector`,
+`string`, `list`, `map`, `find` e `sort` da STL, conforme permitido pela
+atividade.

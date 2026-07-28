@@ -2,6 +2,7 @@
 #define RECOMENDACAO_H
 
 #include "lista_compras.h"
+#include "csr.h"
 #include <vector>
 
 typedef struct{
@@ -14,6 +15,12 @@ std::vector<int> recomendarProdutos(
     int k,
     const ListaCompras *lista,
     const std::vector<std::vector<double> > *matriz_similaridade
+);
+std::vector<int> recomendarProdutosCSR(
+    int cliente_idx,
+    int k,
+    const ListaCompras *lista,
+    const SimilaridadeCSR *similaridade
 );
 
 #endif
