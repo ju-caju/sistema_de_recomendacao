@@ -1,30 +1,30 @@
 #include "lista_compras.h"
 #include "similaridade.h"
 
-#include <climits>
-#include <cstdlib>
-#include <cstring>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 
-static bool converterInteiro(const char *texto, int &valor) {
+static bool converterInteiro(const char *texto, int *valor) {
     char *fim;
-    long numero = std::strtol(texto, &fim, 10);
+    long numero = strtol(texto, &fim, 10);
 
     if (texto[0] == '\0' || fim[0] != '\0' || numero < INT_MIN || numero > INT_MAX) {
         return false;
     }
 
-    valor = (int)numero;
+    *valor = (int)numero;
     return true;
 }
 
-static bool obterAlgoritmo(const char *nome, int &algoritmo) {
-    if (std::strcmp(nome, "padrao") == 0) {
-        algoritmo = ALGORITMO_PADRAO;
+static bool obterAlgoritmo(const char *nome, int *algoritmo) {
+    if (strcmp(nome, "padrao") == 0) {
+        *algoritmo = ALGORITMO_PADRAO;
         return true;
     }
 
-    if (std::strcmp(nome, "adaptado") == 0) {
-        algoritmo = ALGORITMO_ADAPTADO;
+    if (strcmp(nome, "adaptado") == 0) {
+        *algoritmo = ALGORITMO_ADAPTADO;
         return true;
     }
 
@@ -41,18 +41,19 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (!converterInteiro(argv[2], idx_1) || !converterInteiro(argv[3], idx_2)) {
+    if (!converterInteiro(argv[2], &idx_1)
+        || !converterInteiro(argv[3], &idx_2)) {
         printf("Os indices dos clientes devem ser numeros inteiros validos.\n");
         return 1;
     }
 
-    if (argc == 5 && !obterAlgoritmo(argv[4], algoritmo)) {
+    if (argc == 5 && !obterAlgoritmo(argv[4], &algoritmo)) {
         printf("Algoritmo invalido: %s. Use padrao ou adaptado.\n", argv[4]);
         return 1;
     }
 
     ListaCompras lista;
-    if (!carregarListaCompras(lista, argv[1])) {
+    if (!carregarListaCompras(&lista, argv[1])) {
         printf("Nao foi possivel abrir o arquivo %s.\n", argv[1]);
         return 1;
     }
@@ -69,24 +70,29 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::vector<std::vector<int> > matriz_compras = construirMatrizCompras(lista);
+    std::vector<std::vector<int> > matriz_compras =
+        construirMatrizCompras(&lista);
     std::vector<std::vector<int> > intersecao;
 
     if (matriz_compras.empty()
-        || !construirMatrizIntersecao(matriz_compras, algoritmo, intersecao)
+        || !construirMatrizIntersecao(
+            &matriz_compras,
+            algoritmo,
+            &intersecao
+        )
         || intersecao.empty()) {
         printf("Falha ao construir a matriz de intersecao.\n");
         return 1;
     }
 
     std::vector<std::vector<double> > similaridade =
-        calcularMatrizSimilaridade(intersecao, lista);
+        calcularMatrizSimilaridade(&intersecao, &lista);
 
     int indices[2] = {idx_1, idx_2};
 
     for (int i = 0; i < 2; i++) {
         int indice = indices[i];
-        int vizinho = encontrarSimilar(indice, similaridade);
+        int vizinho = encontrarSimilar(indice, &similaridade);
 
         printf("\nPara o cliente de indice interno [%d] (Codigo original: %s):\n",
                indice, lista.codigos_clientes[indice].c_str());

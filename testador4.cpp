@@ -1,44 +1,44 @@
 #include "lista_compras.h"
 #include "similaridade.h"
 
-#include <climits>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
+#include <limits.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <vector>
 
 #define REPETICOES_BENCHMARK 3
 #define TOLERANCIA_SIMILARIDADE 0.000000001
 
-static bool converterInteiroPositivo(const char *texto, int &valor) {
+static bool converterInteiroPositivo(const char *texto, int *valor) {
     char *fim;
-    long numero = std::strtol(texto, &fim, 10);
+    long numero = strtol(texto, &fim, 10);
 
     if (texto[0] == '\0' || fim[0] != '\0'
         || numero <= 0 || numero > INT_MAX) {
         return false;
     }
 
-    valor = (int)numero;
+    *valor = (int)numero;
     return true;
 }
 
 static bool matrizesInteirasIguais(
-    const std::vector<std::vector<int> > &matriz_a,
-    const std::vector<std::vector<int> > &matriz_b
+    const std::vector<std::vector<int> > *matriz_a,
+    const std::vector<std::vector<int> > *matriz_b
 ) {
-    if (matriz_a.size() != matriz_b.size()) {
+    if (matriz_a->size() != matriz_b->size()) {
         return false;
     }
 
-    for (size_t i = 0; i < matriz_a.size(); i++) {
-        if (matriz_a[i].size() != matriz_b[i].size()) {
+    for (size_t i = 0; i < matriz_a->size(); i++) {
+        if ((*matriz_a)[i].size() != (*matriz_b)[i].size()) {
             return false;
         }
 
-        for (size_t j = 0; j < matriz_a[i].size(); j++) {
-            if (matriz_a[i][j] != matriz_b[i][j]) {
+        for (size_t j = 0; j < (*matriz_a)[i].size(); j++) {
+            if ((*matriz_a)[i][j] != (*matriz_b)[i][j]) {
                 return false;
             }
         }
@@ -48,20 +48,21 @@ static bool matrizesInteirasIguais(
 }
 
 static bool matrizesReaisIguais(
-    const std::vector<std::vector<double> > &matriz_a,
-    const std::vector<std::vector<double> > &matriz_b
+    const std::vector<std::vector<double> > *matriz_a,
+    const std::vector<std::vector<double> > *matriz_b
 ) {
-    if (matriz_a.size() != matriz_b.size()) {
+    if (matriz_a->size() != matriz_b->size()) {
         return false;
     }
 
-    for (size_t i = 0; i < matriz_a.size(); i++) {
-        if (matriz_a[i].size() != matriz_b[i].size()) {
+    for (size_t i = 0; i < matriz_a->size(); i++) {
+        if ((*matriz_a)[i].size() != (*matriz_b)[i].size()) {
             return false;
         }
 
-        for (size_t j = 0; j < matriz_a[i].size(); j++) {
-            double diferenca = std::fabs(matriz_a[i][j] - matriz_b[i][j]);
+        for (size_t j = 0; j < (*matriz_a)[i].size(); j++) {
+            double diferenca =
+                fabs((*matriz_a)[i][j] - (*matriz_b)[i][j]);
 
             if (diferenca > TOLERANCIA_SIMILARIDADE) {
                 return false;
@@ -102,30 +103,30 @@ static bool testarMatrizConhecida() {
     }
 
     if (!construirMatrizIntersecao(
-            matriz,
+            &matriz,
             ALGORITMO_PADRAO,
-            resultado_padrao
+            &resultado_padrao
         )) {
         return false;
     }
 
     if (!construirMatrizIntersecao(
-            matriz,
+            &matriz,
             ALGORITMO_ADAPTADO,
-            resultado_adaptado
+            &resultado_adaptado
         )) {
         return false;
     }
 
-    return matrizesInteirasIguais(resultado_padrao, esperado)
-        && matrizesInteirasIguais(resultado_adaptado, esperado);
+    return matrizesInteirasIguais(&resultado_padrao, &esperado)
+        && matrizesInteirasIguais(&resultado_adaptado, &esperado);
 }
 
 static bool executarBenchmark(
-    const ListaCompras &lista,
+    const ListaCompras *lista,
     int quantidade_solicitada
 ) {
-    int total_clientes = (int)lista.codigos_clientes.size();
+    int total_clientes = (int)lista->codigos_clientes.size();
     int quantidade_clientes = quantidade_solicitada;
 
     if (quantidade_clientes > total_clientes) {
@@ -155,9 +156,9 @@ static bool executarBenchmark(
 
         clock_t inicio_padrao = clock();
         bool sucesso_padrao = construirMatrizIntersecao(
-            matriz_compras,
+            &matriz_compras,
             ALGORITMO_PADRAO,
-            intersecao_padrao
+            &intersecao_padrao
         );
 
         if (!sucesso_padrao) {
@@ -166,7 +167,7 @@ static bool executarBenchmark(
         }
 
         similaridade_padrao =
-            calcularMatrizSimilaridade(intersecao_padrao, lista);
+            calcularMatrizSimilaridade(&intersecao_padrao, lista);
         clock_t fim_padrao = clock();
         soma_tempo_padrao +=
             (double)(fim_padrao - inicio_padrao) / CLOCKS_PER_SEC;
@@ -176,9 +177,9 @@ static bool executarBenchmark(
 
         clock_t inicio_adaptado = clock();
         bool sucesso_adaptado = construirMatrizIntersecao(
-            matriz_compras,
+            &matriz_compras,
             ALGORITMO_ADAPTADO,
-            intersecao_adaptada
+            &intersecao_adaptada
         );
 
         if (!sucesso_adaptado) {
@@ -187,7 +188,7 @@ static bool executarBenchmark(
         }
 
         similaridade_adaptada =
-            calcularMatrizSimilaridade(intersecao_adaptada, lista);
+            calcularMatrizSimilaridade(&intersecao_adaptada, lista);
         clock_t fim_adaptado = clock();
         soma_tempo_adaptado +=
             (double)(fim_adaptado - inicio_adaptado) / CLOCKS_PER_SEC;
@@ -196,9 +197,9 @@ static bool executarBenchmark(
     double tempo_padrao = soma_tempo_padrao / REPETICOES_BENCHMARK;
     double tempo_adaptado = soma_tempo_adaptado / REPETICOES_BENCHMARK;
     bool intersecoes_iguais =
-        matrizesInteirasIguais(intersecao_padrao, intersecao_adaptada);
+        matrizesInteirasIguais(&intersecao_padrao, &intersecao_adaptada);
     bool similaridades_iguais =
-        matrizesReaisIguais(similaridade_padrao, similaridade_adaptada);
+        matrizesReaisIguais(&similaridade_padrao, &similaridade_adaptada);
 
     printf("%8d | %8d | %9.6f | %11.6f | ",
            quantidade_clientes,
@@ -239,7 +240,7 @@ int main(int argc, char *argv[]) {
 
     ListaCompras lista;
 
-    if (!carregarListaCompras(lista, argv[1])) {
+    if (!carregarListaCompras(&lista, argv[1])) {
         printf("Nao foi possivel abrir o arquivo %s.\n", argv[1]);
         return 1;
     }
@@ -252,7 +253,7 @@ int main(int argc, char *argv[]) {
     for (int i = 2; i < argc; i++) {
         int quantidade;
 
-        if (!converterInteiroPositivo(argv[i], quantidade)) {
+        if (!converterInteiroPositivo(argv[i], &quantidade)) {
             printf("Quantidade de clientes invalida: %s.\n", argv[i]);
             return 1;
         }
@@ -269,9 +270,9 @@ int main(int argc, char *argv[]) {
 
     for (int i = 2; i < argc; i++) {
         int quantidade;
-        converterInteiroPositivo(argv[i], quantidade);
+        converterInteiroPositivo(argv[i], &quantidade);
 
-        if (!executarBenchmark(lista, quantidade)) {
+        if (!executarBenchmark(&lista, quantidade)) {
             todos_iguais = false;
         }
     }

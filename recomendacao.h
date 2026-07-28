@@ -9,6 +9,11 @@ typedef struct{
     double rank;
 } ProdutoRank;
 
-std::vector<int> recomendarProdutos(int cliente_idx, int k, const ListaCompras &lista, const std::vector<std::vector<double> > &matriz_similaridade);
+std::vector<int> recomendarProdutos(
+    int cliente_idx,
+    int k,
+    const ListaCompras *lista,
+    const std::vector<std::vector<double> > *matriz_similaridade
+);
 
 #endif

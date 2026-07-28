@@ -1,16 +1,21 @@
 #include "similaridade.h"
 
-std::vector<std::vector<int> > construirMatrizCompras(const ListaCompras &lista) {
-    return construirMatrizComprasLimitada(lista, (int)lista.codigos_clientes.size());
+std::vector<std::vector<int> > construirMatrizCompras(
+    const ListaCompras *lista
+) {
+    return construirMatrizComprasLimitada(
+        lista,
+        (int)lista->codigos_clientes.size()
+    );
 }
 
 std::vector<std::vector<int> > construirMatrizComprasLimitada(
-    const ListaCompras &lista,
+    const ListaCompras *lista,
     int limite_clientes
 ) {
-    int total_clientes = (int)lista.codigos_clientes.size();
+    int total_clientes = (int)lista->codigos_clientes.size();
     int quantidade_clientes;
-    int quantidade_produtos = (int)lista.nomes_produtos.size();
+    int quantidade_produtos = (int)lista->nomes_produtos.size();
 
     if (limite_clientes <= 0) {
         return std::vector<std::vector<int> >();
@@ -27,9 +32,12 @@ std::vector<std::vector<int> > construirMatrizComprasLimitada(
     );
 
     for (int i = 0; i < quantidade_clientes; i++) {
-        for (std::list<int>::const_iterator it = lista.compras_clientes[i].begin(); 
-             it != lista.compras_clientes[i].end(); ++it) {
-            matriz[i][*it] = 1;
+        std::list<int> compras = lista->compras_clientes[i];
+
+        while (!compras.empty()) {
+            int produto = compras.front();
+            matriz[i][produto] = 1;
+            compras.pop_front();
         }
     }
 
@@ -37,14 +45,14 @@ std::vector<std::vector<int> > construirMatrizComprasLimitada(
 }
 
 std::vector<std::vector<int> > transporMatriz(
-    const std::vector<std::vector<int> > &matriz
+    const std::vector<std::vector<int> > *matriz
 ) {
-    if (matriz.empty()) {
+    if (matriz->empty()) {
         return std::vector<std::vector<int> >();
     }
 
-    int quantidade_linhas = (int)matriz.size();
-    int quantidade_colunas = (int)matriz[0].size();
+    int quantidade_linhas = (int)matriz->size();
+    int quantidade_colunas = (int)(*matriz)[0].size();
     std::vector<std::vector<int> > transposta(
         quantidade_colunas,
         std::vector<int>(quantidade_linhas, 0)
@@ -52,7 +60,7 @@ std::vector<std::vector<int> > transporMatriz(
 
     for (int i = 0; i < quantidade_linhas; i++) {
         for (int j = 0; j < quantidade_colunas; j++) {
-            transposta[j][i] = matriz[i][j];
+            transposta[j][i] = (*matriz)[i][j];
         }
     }
 
@@ -60,17 +68,17 @@ std::vector<std::vector<int> > transporMatriz(
 }
 
 std::vector<std::vector<int> > multiplicarMatrizes(
-    const std::vector<std::vector<int> > &matriz_a,
-    const std::vector<std::vector<int> > &matriz_b
+    const std::vector<std::vector<int> > *matriz_a,
+    const std::vector<std::vector<int> > *matriz_b
 ) {
-    if (matriz_a.empty() || matriz_b.empty()) {
+    if (matriz_a->empty() || matriz_b->empty()) {
         return std::vector<std::vector<int> >();
     }
 
-    int linhas_a = (int)matriz_a.size();
-    int colunas_a = (int)matriz_a[0].size();
-    int linhas_b = (int)matriz_b.size();
-    int colunas_b = (int)matriz_b[0].size();
+    int linhas_a = (int)matriz_a->size();
+    int colunas_a = (int)(*matriz_a)[0].size();
+    int linhas_b = (int)matriz_b->size();
+    int colunas_b = (int)(*matriz_b)[0].size();
 
     if (colunas_a != linhas_b) {
         return std::vector<std::vector<int> >();
@@ -84,7 +92,8 @@ std::vector<std::vector<int> > multiplicarMatrizes(
     for (int i = 0; i < linhas_a; i++) {
         for (int j = 0; j < colunas_b; j++) {
             for (int k = 0; k < colunas_a; k++) {
-                resultado[i][j] += matriz_a[i][k] * matriz_b[k][j];
+                resultado[i][j] +=
+                    (*matriz_a)[i][k] * (*matriz_b)[k][j];
             }
         }
     }
@@ -93,14 +102,14 @@ std::vector<std::vector<int> > multiplicarMatrizes(
 }
 
 std::vector<std::vector<int> > multiplicarPorTranspostaAdaptado(
-    const std::vector<std::vector<int> > &matriz
+    const std::vector<std::vector<int> > *matriz
 ) {
-    if (matriz.empty()) {
+    if (matriz->empty()) {
         return std::vector<std::vector<int> >();
     }
 
-    int quantidade_linhas = (int)matriz.size();
-    int quantidade_colunas = (int)matriz[0].size();
+    int quantidade_linhas = (int)matriz->size();
+    int quantidade_colunas = (int)(*matriz)[0].size();
     std::vector<std::vector<int> > resultado(
         quantidade_linhas,
         std::vector<int>(quantidade_linhas, 0)
@@ -111,7 +120,8 @@ std::vector<std::vector<int> > multiplicarPorTranspostaAdaptado(
             int soma = 0;
 
             for (int produto = 0; produto < quantidade_colunas; produto++) {
-                soma += matriz[i][produto] * matriz[j][produto];
+                soma +=
+                    (*matriz)[i][produto] * (*matriz)[j][produto];
             }
 
             resultado[i][j] = soma;
@@ -123,52 +133,58 @@ std::vector<std::vector<int> > multiplicarPorTranspostaAdaptado(
 }
 
 bool construirMatrizIntersecao(
-    const std::vector<std::vector<int> > &matriz_compras,
+    const std::vector<std::vector<int> > *matriz_compras,
     int algoritmo,
-    std::vector<std::vector<int> > &intersecao
+    std::vector<std::vector<int> > *intersecao
 ) {
     if (algoritmo == ALGORITMO_PADRAO) {
         std::vector<std::vector<int> > transposta = transporMatriz(matriz_compras);
-        intersecao = multiplicarMatrizes(matriz_compras, transposta);
+        *intersecao = multiplicarMatrizes(matriz_compras, &transposta);
         return true;
     }
 
     if (algoritmo == ALGORITMO_ADAPTADO) {
-        intersecao = multiplicarPorTranspostaAdaptado(matriz_compras);
+        *intersecao = multiplicarPorTranspostaAdaptado(matriz_compras);
         return true;
     }
 
-    intersecao.clear();
+    intersecao->clear();
     return false;
 }
 
-std::vector<std::vector<double> > calcularMatrizSimilaridade(const std::vector<std::vector<int> > &intersecao, const ListaCompras &lista) {
-    int n_clientes = intersecao.size();
+std::vector<std::vector<double> > calcularMatrizSimilaridade(
+    const std::vector<std::vector<int> > *intersecao,
+    const ListaCompras *lista
+) {
+    int n_clientes = (int)intersecao->size();
     std::vector<std::vector<double> > S(n_clientes, std::vector<double>(n_clientes, 0.0));
     
     for (int i = 0; i < n_clientes; ++i) {
-        double tamanho_Pi = lista.compras_clientes[i].size(); 
+        double tamanho_Pi = lista->compras_clientes[i].size();
         
         for (int j = 0; j < n_clientes; ++j) {
             if (tamanho_Pi > 0) {
-                S[i][j] = 1.0 - ((double)intersecao[i][j] / tamanho_Pi);
-            } else {
+                S[i][j] =
+                    1.0 - ((double)(*intersecao)[i][j] / tamanho_Pi);
             }
         }
     }
     return S;
 }
 
-int encontrarSimilar(int cliente_idx, const std::vector<std::vector<double> > &S) {
-    int n_clientes = S.size();
+int encontrarSimilar(
+    int cliente_idx,
+    const std::vector<std::vector<double> > *S
+) {
+    int n_clientes = (int)S->size();
     double menor_distancia = 2.0;
     int vizinho_mais_similar = -1;
     
     for (int j = 0; j < n_clientes; ++j) {
         if (j == cliente_idx) continue; 
         
-        if (S[cliente_idx][j] < menor_distancia) {
-            menor_distancia = S[cliente_idx][j];
+        if ((*S)[cliente_idx][j] < menor_distancia) {
+            menor_distancia = (*S)[cliente_idx][j];
             vizinho_mais_similar = j;
         }
     }

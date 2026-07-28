@@ -1,6 +1,6 @@
 #include "lista_compras.h"
 
-#include <cstdio>
+#include <stdio.h>
 
 int main(int quantidade_argumentos, char *argumentos[]) {
     ListaCompras lista;
@@ -10,16 +10,19 @@ int main(int quantidade_argumentos, char *argumentos[]) {
         return 1;
     }
 
-    if (!carregarListaCompras(lista, argumentos[1])) {
+    if (!carregarListaCompras(&lista, argumentos[1])) {
         printf("Nao foi possivel abrir o arquivo %s.\n", argumentos[1]);
         return 1;
     }
 
     printf("Clientes: %d\nProdutos: %d\n\n", (int)lista.codigos_clientes.size(), (int)lista.nomes_produtos.size());
-    exibirComprasCliente(lista, argumentos[2]);
+    std::string codigo_cliente = argumentos[2];
+    exibirComprasCliente(&lista, &codigo_cliente);
     printf("\n");
-    exibirComprasCliente(lista, argumentos[3]);
+    codigo_cliente = argumentos[3];
+    exibirComprasCliente(&lista, &codigo_cliente);
     printf("\n");
-    exibirComprasCliente(lista, argumentos[4]);
+    codigo_cliente = argumentos[4];
+    exibirComprasCliente(&lista, &codigo_cliente);
     return 0;
 }

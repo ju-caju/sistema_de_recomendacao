@@ -14,8 +14,15 @@ typedef struct {
     std::vector<std::list<int> > compras_clientes;
 } ListaCompras;
 
-bool carregarListaCompras(ListaCompras &lista, const char *caminho_arquivo);
-bool obterIndiceCliente(const ListaCompras &lista, const std::string &codigo_cliente, int &indice_cliente);
-void exibirComprasCliente(const ListaCompras &lista, const std::string &codigo_cliente);
+bool carregarListaCompras(ListaCompras *lista, const char *caminho_arquivo);
+bool obterIndiceCliente(
+    const ListaCompras *lista,
+    const std::string *codigo_cliente,
+    int *indice_cliente
+);
+void exibirComprasCliente(
+    const ListaCompras *lista,
+    const std::string *codigo_cliente
+);
 
 #endif

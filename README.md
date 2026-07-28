@@ -5,6 +5,12 @@ distancia entre clientes e recomenda produtos. A Atividade 4 acrescenta uma
 multiplicacao eficiente da matriz de compras por sua transposta e um benchmark
 comparativo com o algoritmo padrao.
 
+O codigo segue o estilo procedural da linguagem C. O compilador C++ e usado
+somente porque a especificacao permite as estruturas `vector`, `string`, `map`
+e `list`, alem dos algoritmos `find` e `sort` da STL. A implementacao nao usa
+classes proprias, referencias, iteradores, lacos baseados em intervalo ou
+outros recursos exclusivos de C++ fora dessas excecoes.
+
 ## Compilacao
 
 O projeto usa `g++` com as opcoes `-std=c++11 -Wall -Wextra -pedantic`.

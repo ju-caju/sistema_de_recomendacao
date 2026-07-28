@@ -1,17 +1,23 @@
 #include "recomendacao.h"
 #include <algorithm>
 
-static bool compararPorRank(const ProdutoRank &a, const ProdutoRank &b) {
+static bool compararPorRank(ProdutoRank a, ProdutoRank b) {
     return a.rank < b.rank;
 }
 
-std::vector<int> recomendarProdutos(int cliente_idx, int k, const ListaCompras &lista, const std::vector<std::vector<double> > &matriz_similaridade) {
-    int n_clientes = lista.codigos_clientes.size();
-    int n_produtos = lista.nomes_produtos.size();
+std::vector<int> recomendarProdutos(
+    int cliente_idx,
+    int k,
+    const ListaCompras *lista,
+    const std::vector<std::vector<double> > *matriz_similaridade
+) {
+    int n_clientes = (int)lista->codigos_clientes.size();
+    int n_produtos = (int)lista->nomes_produtos.size();
 
     std::vector<int> vizinhos;
     for (int j = 0; j < n_clientes; ++j) {
-        if (j != cliente_idx && matriz_similaridade[cliente_idx][j] < 1.0) {
+        if (j != cliente_idx
+            && (*matriz_similaridade)[cliente_idx][j] < 1.0) {
             vizinhos.push_back(j);
         }
     }
@@ -21,18 +27,26 @@ std::vector<int> recomendarProdutos(int cliente_idx, int k, const ListaCompras &
         R[p].rank = 1.0;
     }
     std::vector<bool> cliente_ja_comprou(n_produtos, false);
-    
-    for (int p : lista.compras_clientes[cliente_idx]) {
+
+    std::list<int> compras_cliente =
+        lista->compras_clientes[cliente_idx];
+    while (!compras_cliente.empty()) {
+        int p = compras_cliente.front();
         cliente_ja_comprou[p] = true;
+        compras_cliente.pop_front();
     }
 
-    for (int s : vizinhos) { 
-        double distancia_c_s = matriz_similaridade[cliente_idx][s];
+    for (size_t i = 0; i < vizinhos.size(); i++) {
+        int s = vizinhos[i];
+        double distancia_c_s = (*matriz_similaridade)[cliente_idx][s];
+        std::list<int> compras_vizinho = lista->compras_clientes[s];
 
-        for (int p : lista.compras_clientes[s]) {
+        while (!compras_vizinho.empty()) {
+            int p = compras_vizinho.front();
             if (!cliente_ja_comprou[p]) {
                 R[p].rank = R[p].rank * distancia_c_s;
             }
+            compras_vizinho.pop_front();
         }
     }
     std::vector<ProdutoRank> produtos_recomendaveis;
@@ -42,7 +56,11 @@ std::vector<int> recomendarProdutos(int cliente_idx, int k, const ListaCompras &
         }
     }
 
-    std::sort(produtos_recomendaveis.begin(), produtos_recomendaveis.end(), compararPorRank);
+    if (!produtos_recomendaveis.empty()) {
+        ProdutoRank *inicio = &produtos_recomendaveis[0];
+        ProdutoRank *fim = inicio + produtos_recomendaveis.size();
+        std::sort(inicio, fim, compararPorRank);
+    }
 
     std::vector<int> top_k;
     for (size_t i = 0; i < produtos_recomendaveis.size() && i < (size_t)k; ++i) {
