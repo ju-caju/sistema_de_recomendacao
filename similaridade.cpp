@@ -166,6 +166,10 @@ std::vector<std::vector<double> > calcularMatrizSimilaridade(
             if (tamanho_Pi > 0) {
                 S[i][j] =
                     1.0 - ((double)(*intersecao)[i][j] / tamanho_Pi);
+            } else if (i == j) {
+                S[i][j] = 0.0;
+            } else {
+                S[i][j] = 1.0;
             }
         }
     }
