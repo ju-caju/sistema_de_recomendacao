@@ -28,13 +28,16 @@ make atividade1
 make atividade2
 make atividade3
 make atividade4
+make atividade5
 ```
 
 ## Atividade 1 - Lista de compras
 
 O modulo `ListaCompras` aceita arquivos CSV separados por virgula ou ponto e
 virgula, preserva codigos como texto, incluindo zeros iniciais, e remove compras
-duplicadas de um mesmo produto pelo mesmo cliente.
+duplicadas de um mesmo produto pelo mesmo cliente. Conforme o enunciado, a
+leitura ocorre em duas fases: a primeira cria os indices internos e a segunda
+preenche as listas de compras.
 
 ```bash
 ./bin/atividade1 dados/dados_venda_cluster_1.csv 99DIQV01 67903101 9OBKC801
@@ -63,6 +66,11 @@ O parametro de selecao do algoritmo tambem e opcional no testador da Atividade
 ./bin/atividade3 dados/dados_venda_cluster_1.csv 3 99DIQV01 67903101 9OBKC801 adaptado
 ./bin/atividade3 dados/dados_venda_cluster_1.csv 3 99DIQV01 67903101 9OBKC801
 ```
+
+O vetor completo de ranqueamento e ordenado de forma nao decrescente. O modulo
+retorna `min(k, quantidade de produtos)` itens, inclusive produtos que
+permaneceram com rank 1 quando nao existem `k` produtos favorecidos pelos
+vizinhos, conforme o algoritmo especificado no projeto.
 
 ## Atividade 4 - Multiplicacao eficiente
 
@@ -99,8 +107,8 @@ primeiros N clientes, mantendo todas as colunas de produtos.
 ### Benchmark
 
 O arquivo `dados_vendas.csv` possui 321.741 registros, 236.244 clientes e 715
-produtos. Ele e carregado uma unica vez, mas a matriz densa e construida
-somente para recortes controlados. Nao se deve construir `A` para os 236.244
+produtos. A lista e preparada antes das medicoes, mas a matriz densa e
+construida somente para recortes controlados. Nao se deve construir `A` para os 236.244
 clientes nem a matriz `C` de dimensao 236.244 por 236.244, pois o consumo de
 memoria seria excessivo.
 
@@ -176,3 +184,72 @@ alocacao da matriz densa completa.
 O codigo continua procedural: usa recursos da linguagem C e apenas `vector`,
 `string`, `list`, `map`, `find` e `sort` da STL, conforme permitido pela
 atividade.
+
+## Testes de regressao
+
+O teste rapido usa `dados/teste_regressao.csv` e verifica leitura em duas fases,
+remocao de duplicatas, campos entre aspas, assimetria da distancia definida no
+enunciado, igualdade entre os algoritmos padrao e adaptado, equivalencia do CSR,
+clientes vazios e recomendacoes.
+
+A compilacao e a execucao sao comandos separados:
+
+```bash
+make testes
+./bin/testes
+```
+
+Os benchmarks permanecem manuais nos executaveis das Atividades 4 e 5.
+
+## Atividade 6 - Integracao Python-C++
+
+Na Atividade 6, o CSV e lido exclusivamente por
+`integracao_python/leitura_compras.py`. A leitura Python tambem usa duas fases e
+produz as mesmas estruturas logicas da Atividade 1. O arquivo
+`integracao_python/bindings.cpp` converte as listas Python para a struct
+`ListaCompras` e chama as funcoes procedurais das Atividades 2 a 5.
+
+O binding nao cria classes proprias nem usa `py::class_`. Ele expoe funcoes
+livres que recebem e retornam estruturas automaticamente convertidas pelo
+pybind11. Os modulos de calculo continuam em C++11 e nao compilam
+`lista_compras.cpp`, pois a leitura pertence ao Python nesta atividade.
+
+### Dependencias e compilacao manual
+
+Instale as dependencias indicadas no enunciado:
+
+```bash
+pip install pybind11 setuptools wheel
+```
+
+Compile manualmente dentro da pasta de integracao:
+
+```bash
+cd integracao_python
+python setup.py build_ext --inplace
+```
+
+### Execucao
+
+A interface segue o formato do projeto-base:
+
+```bash
+python main.py <arquivo.csv> <entrega> <algoritmo> <k>
+```
+
+Os algoritmos sao `0 = padrao`, `1 = adaptado` e `2 = CSR`. Exemplos, a partir
+da pasta `integracao_python`:
+
+```bash
+python main.py ../dados/dados_venda_cluster_1.csv 1 0 0
+python main.py ../dados/dados_venda_cluster_1.csv 2 1 0
+python main.py ../dados/dados_venda_cluster_1.csv 3 2 10
+python main.py ../dados/teste_regressao.csv 4 0 0
+python main.py ../dados/teste_regressao.csv 5 2 0
+```
+
+O teste da integracao e executado manualmente depois da compilacao:
+
+```bash
+python teste_integracao.py
+```
