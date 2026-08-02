@@ -1,0 +1,6 @@
+bin/
+testador
+integracao_python/build/
+integracao_python/*.so
+integracao_python/*.pyd
+integracao_python/__pycache__/
