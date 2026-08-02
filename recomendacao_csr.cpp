@@ -69,18 +69,10 @@ std::vector<int> recomendarProdutosCSR(
         }
     }
 
-    std::vector<ProdutoRank> produtos_recomendaveis;
-
-    for (int produto = 0; produto < n_produtos; produto++) {
-        if (!cliente_ja_comprou[produto] && ranking[produto].rank < 1.0) {
-            produtos_recomendaveis.push_back(ranking[produto]);
-        }
-    }
-
-    if (!produtos_recomendaveis.empty()) {
+    if (!ranking.empty()) {
         std::sort(
-            &produtos_recomendaveis[0],
-            &produtos_recomendaveis[0] + produtos_recomendaveis.size(),
+            &ranking[0],
+            &ranking[0] + ranking.size(),
             compararProdutoCSR
         );
     }
@@ -88,9 +80,9 @@ std::vector<int> recomendarProdutosCSR(
     std::vector<int> top_k;
 
     for (size_t indice = 0;
-         indice < produtos_recomendaveis.size() && indice < (size_t)k;
+         indice < ranking.size() && indice < (size_t)k;
          indice++) {
-        top_k.push_back(produtos_recomendaveis[indice].id_produto);
+        top_k.push_back(ranking[indice].id_produto);
     }
 
     return top_k;
