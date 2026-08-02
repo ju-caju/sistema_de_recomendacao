@@ -91,7 +91,29 @@ static int obterOuCriarProduto(
     return indice_produto;
 }
 
+static void limparListaCompras(ListaCompras *lista) {
+    lista->codigos_clientes.clear();
+    lista->indices_clientes.clear();
+    lista->nomes_produtos.clear();
+    lista->indices_produtos.clear();
+    lista->compras_clientes.clear();
+}
+
+static char detectarSeparador(const char *linha) {
+    for (int indice = 0; linha[indice] != '\0'; indice++) {
+        if (linha[indice] == ';') {
+            return ';';
+        }
+    }
+
+    return ',';
+}
+
 bool carregarListaCompras(ListaCompras *lista, const char *caminho_arquivo) {
+    if (lista == NULL || caminho_arquivo == NULL) {
+        return false;
+    }
+
     FILE *arquivo = fopen(caminho_arquivo, "r");
     char linha[4096];
 
@@ -104,14 +126,10 @@ bool carregarListaCompras(ListaCompras *lista, const char *caminho_arquivo) {
         return false;
     }
 
-    char separador = ','; 
+    limparListaCompras(lista);
+    char separador = detectarSeparador(linha);
 
-    for (int i = 0; linha[i] != '\0'; i++) {
-        if (linha[i] == ';') {
-            separador = ';'; 
-            break;          
-    }
-}
+    /* Primeira fase: cria os indices internos de clientes e produtos. */
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
         std::string texto_linha = linha;
         std::vector<std::string> campos = separarCampos(&texto_linha, separador);
@@ -120,9 +138,31 @@ bool carregarListaCompras(ListaCompras *lista, const char *caminho_arquivo) {
             continue;
         }
 
-        int indice_cliente = obterOuCriarCliente(lista, &campos[1]);
-        int indice_produto =
-            obterOuCriarProduto(lista, &campos[2], &campos[3]);
+        obterOuCriarCliente(lista, &campos[1]);
+        obterOuCriarProduto(lista, &campos[2], &campos[3]);
+    }
+
+    rewind(arquivo);
+
+    if (fgets(linha, sizeof(linha), arquivo) == NULL) {
+        fclose(arquivo);
+        limparListaCompras(lista);
+        return false;
+    }
+
+    /* Segunda fase: preenche as listas sem repetir o mesmo produto. */
+    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+        std::string texto_linha = linha;
+        std::vector<std::string> campos = separarCampos(&texto_linha, separador);
+
+        if (campos.size() < 4 ||
+            lista->indices_clientes.count(campos[1]) == 0 ||
+            lista->indices_produtos.count(campos[2]) == 0) {
+            continue;
+        }
+
+        int indice_cliente = lista->indices_clientes.at(campos[1]);
+        int indice_produto = lista->indices_produtos.at(campos[2]);
         std::list<int> compras =
             lista->compras_clientes[indice_cliente];
         bool produto_encontrado = false;
