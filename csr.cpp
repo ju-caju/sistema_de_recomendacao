@@ -214,7 +214,7 @@ bool obterSimilaridadeCSR(
     int quantidade = similaridade->quantidade_compras[cliente_1];
 
     if (quantidade == 0) {
-        *valor = 1.0;
+        *valor = cliente_1 == cliente_2 ? 0.0 : 1.0;
     } else {
         *valor = 1.0 - (double)intersecao / quantidade;
     }
@@ -248,6 +248,11 @@ int encontrarSimilarCSR(
             melhor_cliente = candidato;
             maior_intersecao = intersecao;
         }
+    }
+
+    if (melhor_cliente < 0 &&
+        similaridade->intersecoes.quantidade_linhas > 1) {
+        melhor_cliente = cliente_idx == 0 ? 1 : 0;
     }
 
     return melhor_cliente;
