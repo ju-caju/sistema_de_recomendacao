@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic
 
 BIN_DIR = bin
 
-.PHONY: all atividade1 atividade2 atividade3 atividade4 atividade5 clean
+.PHONY: all atividade1 atividade2 atividade3 atividade4 atividade5 testes clean
 
 all: atividade1 atividade2 atividade3 atividade4 atividade5
 
@@ -16,6 +16,8 @@ atividade3: $(BIN_DIR)/atividade3
 atividade4: $(BIN_DIR)/atividade4
 
 atividade5: $(BIN_DIR)/atividade5
+
+testes: $(BIN_DIR)/testes
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
@@ -35,5 +37,8 @@ $(BIN_DIR)/atividade4: lista_compras.cpp lista_compras.h similaridade.cpp simila
 $(BIN_DIR)/atividade5: lista_compras.cpp lista_compras.h similaridade.cpp similaridade.h csr.cpp csr.h recomendacao.cpp recomendacao_csr.cpp recomendacao.h testador5.cpp | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) lista_compras.cpp similaridade.cpp csr.cpp recomendacao.cpp recomendacao_csr.cpp testador5.cpp -o $@
 
+$(BIN_DIR)/testes: lista_compras.cpp lista_compras.h similaridade.cpp similaridade.h csr.cpp csr.h recomendacao.cpp recomendacao_csr.cpp recomendacao.h testes.cpp dados/teste_regressao.csv dados/teste_regressao_ponto_virgula.csv | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) lista_compras.cpp similaridade.cpp csr.cpp recomendacao.cpp recomendacao_csr.cpp testes.cpp -o $@
+
 clean:
-	rm -f $(BIN_DIR)/atividade1 $(BIN_DIR)/atividade2 $(BIN_DIR)/atividade3 $(BIN_DIR)/atividade4 $(BIN_DIR)/atividade5
+	rm -f $(BIN_DIR)/atividade1 $(BIN_DIR)/atividade2 $(BIN_DIR)/atividade3 $(BIN_DIR)/atividade4 $(BIN_DIR)/atividade5 $(BIN_DIR)/testes
