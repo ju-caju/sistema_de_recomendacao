@@ -54,12 +54,10 @@ static void criarAmostra(
 }
 
 static bool validarCSR(const MatrizCSR *matriz) {
-    if (matriz->row_ptr.size() !=
-            (size_t)matriz->quantidade_linhas + 1 ||
+    if (matriz->row_ptr.size() != (size_t)matriz->quantidade_linhas + 1 ||
         matriz->values.size() != matriz->col_index.size() ||
         matriz->row_ptr.empty() || matriz->row_ptr[0] != 0 ||
-        matriz->row_ptr[matriz->quantidade_linhas] !=
-            (int)matriz->values.size()) {
+        matriz->row_ptr[matriz->quantidade_linhas] != (int)matriz->values.size()) {
         return false;
     }
 
@@ -75,8 +73,7 @@ static bool validarCSR(const MatrizCSR *matriz) {
                 matriz->col_index[indice] >= matriz->quantidade_colunas ||
                 matriz->values[indice] == 0 ||
                 (indice > matriz->row_ptr[linha] &&
-                 matriz->col_index[indice - 1] >=
-                    matriz->col_index[indice])) {
+                 matriz->col_index[indice - 1] >= matriz->col_index[indice])) {
                 return false;
             }
         }
@@ -161,11 +158,7 @@ static bool compararComDensa(
     clock_t inicio_csr = clock();
     SimilaridadeCSR similaridade_csr;
 
-    if (!construirSimilaridadeCSR(
-            lista,
-            quantidade,
-            &similaridade_csr
-        )) {
+    if (!construirSimilaridadeCSR(lista, quantidade, &similaridade_csr)) {
         return false;
     }
 
@@ -198,8 +191,7 @@ static bool compararComDensa(
                     &distancia_csr
                 ) ||
                 valor_csr != intersecao_densa[linha][coluna] ||
-                fabs(distancia_csr -
-                     similaridade_densa[linha][coluna]) > TOLERANCIA) {
+                fabs(distancia_csr - similaridade_densa[linha][coluna]) > TOLERANCIA) {
                 iguais = false;
                 break;
             }
@@ -207,36 +199,26 @@ static bool compararComDensa(
     }
 
     int quantidade_testes_recomendacao = quantidade;
-    ListaCompras amostra;
-    criarAmostra(lista, quantidade, &amostra);
-
     if (quantidade_testes_recomendacao > 20) {
         quantidade_testes_recomendacao = 20;
     }
 
-    for (int cliente = 0;
-         cliente < quantidade_testes_recomendacao && iguais;
-         cliente++) {
+    ListaCompras amostra;
+    criarAmostra(lista, quantidade, &amostra);
+
+    for (int cliente = 0; cliente < quantidade_testes_recomendacao && iguais; cliente++) {
         std::vector<int> recomendacoes_densas = recomendarProdutos(
-            cliente,
-            5,
-            &amostra,
-            &similaridade_densa
+            cliente, 5, &amostra, &similaridade_densa
         );
         std::vector<int> recomendacoes_csr = recomendarProdutosCSR(
-            cliente,
-            5,
-            &amostra,
-            &similaridade_csr
+            cliente, 5, &amostra, &similaridade_csr
         );
 
         if (recomendacoes_densas.size() != recomendacoes_csr.size()) {
             iguais = false;
         }
 
-        for (size_t indice = 0;
-             indice < recomendacoes_densas.size() && iguais;
-             indice++) {
+        for (size_t indice = 0; indice < recomendacoes_densas.size() && iguais; indice++) {
             if (recomendacoes_densas[indice] != recomendacoes_csr[indice]) {
                 iguais = false;
             }
@@ -244,29 +226,24 @@ static bool compararComDensa(
     }
 
     unsigned long long memoria_densa =
-        estimarMemoriaDensaInt(
-            quantidade,
-            (int)lista->nomes_produtos.size()
-        ) +
+        estimarMemoriaDensaInt(quantidade, (int)lista->nomes_produtos.size()) +
         estimarMemoriaDensaInt(quantidade, quantidade) +
         estimarMemoriaDensaDouble(quantidade, quantidade);
     unsigned long long memoria_csr =
         estimarMemoriaCSR(&compras_csr) +
         estimarMemoriaCSR(&similaridade_csr.intersecoes) +
-        (unsigned long long)similaridade_csr.quantidade_compras.size() *
-            sizeof(int);
-    double tempo_densa =
-        (double)(fim_densa - inicio_densa) / CLOCKS_PER_SEC;
-    double tempo_csr =
-        (double)(fim_csr - inicio_csr) / CLOCKS_PER_SEC;
+        (unsigned long long)similaridade_csr.quantidade_compras.size() * sizeof(int);
 
-    printf("%8d | %10.3f | %8.3f | %8.3f | %6.2fx | %s\n",
+    double tempo_densa = (double)(fim_densa - inicio_densa) / CLOCKS_PER_SEC;
+    double tempo_csr = (double)(fim_csr - inicio_csr) / CLOCKS_PER_SEC;
+
+    printf("Clientes: %d | Densa: %.4fs | CSR: %.4fs | Memoria CSR: %.2f MiB | Economia: %.2fx | Resultado: %s\n",
            quantidade,
            tempo_densa,
            tempo_csr,
            paraMiB(memoria_csr),
            memoria_csr > 0 ? (double)memoria_densa / memoria_csr : 0.0,
-           iguais ? "SIM" : "NAO");
+           iguais ? "OK" : "FALHOU");
 
     return iguais;
 }
@@ -293,47 +270,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    for (int indice = 2; indice < argc; indice++) {
-        int quantidade;
-
-        if (!converterInteiroPositivo(argv[indice], &quantidade)) {
-            printf("Quantidade de clientes invalida: %s.\n", argv[indice]);
-            return 1;
-        }
-    }
-
-    MatrizCSR compras_completa;
-
-    if (!construirMatrizComprasCSR(
-            &lista,
-            (int)lista.codigos_clientes.size(),
-            &compras_completa
-        ) ||
-        !validarCSR(&compras_completa)) {
-        printf("Falha ao construir a matriz de compras CSR.\n");
-        return 1;
-    }
-
-    unsigned long long densa_completa =
-        estimarMemoriaDensaInt(
-            compras_completa.quantidade_linhas,
-            compras_completa.quantidade_colunas
-        );
-    unsigned long long csr_completa = estimarMemoriaCSR(&compras_completa);
-
-    printf("Teste conhecido CSR: OK\n");
-    printf("Base: %d clientes, %d produtos, %d compras distintas\n",
-           compras_completa.quantidade_linhas,
-           compras_completa.quantidade_colunas,
-           (int)compras_completa.values.size());
-    printf("Matriz de compras: densa %.3f MiB; CSR %.3f MiB; "
-           "economia %.2fx\n\n",
-           paraMiB(densa_completa),
-           paraMiB(csr_completa),
-           csr_completa > 0 ? (double)densa_completa / csr_completa : 0.0);
-    printf("Clientes | Densa (s) | CSR (s)  | CSR MiB  | Economia | "
-           "Matrizes/recomendacoes iguais\n");
-
     bool sucesso = true;
 
     if (argc == 2) {
@@ -345,10 +281,10 @@ int main(int argc, char *argv[]) {
     } else {
         for (int indice = 2; indice < argc; indice++) {
             int quantidade;
-            converterInteiroPositivo(argv[indice], &quantidade);
-
-            if (!compararComDensa(&lista, quantidade)) {
-                sucesso = false;
+            if (converterInteiroPositivo(argv[indice], &quantidade)) {
+                if (!compararComDensa(&lista, quantidade)) {
+                    sucesso = false;
+                }
             }
         }
     }

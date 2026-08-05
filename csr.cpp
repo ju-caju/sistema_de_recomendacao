@@ -62,6 +62,7 @@ bool construirMatrizComprasCSR(
     matriz->row_ptr.push_back(0);
 
     for (int cliente = 0; cliente < quantidade_clientes; cliente++) {
+        // Cópia e ordenação via std::list conforme estrutura apresentada no PDF[cite: 6]
         std::list<int> compras = lista->compras_clientes[cliente];
         std::vector<int> produtos;
 
@@ -91,8 +92,7 @@ bool multiplicarCSRPorTransposta(
 ) {
     if (matriz == NULL || resultado == NULL ||
         matriz->quantidade_linhas < 0 || matriz->quantidade_colunas < 0 ||
-        matriz->row_ptr.size() !=
-            (size_t)matriz->quantidade_linhas + 1 ||
+        matriz->row_ptr.size() != (size_t)matriz->quantidade_linhas + 1 ||
         matriz->values.size() != matriz->col_index.size()) {
         return false;
     }
@@ -102,10 +102,6 @@ bool multiplicarCSRPorTransposta(
     resultado->quantidade_colunas = matriz->quantidade_linhas;
     resultado->row_ptr.push_back(0);
 
-    /*
-     * Cada linha do resultado e produzida da esquerda para a direita. Assim,
-     * col_index ja fica ordenado, propriedade usada nas buscas posteriores.
-     */
     for (int linha = 0; linha < matriz->quantidade_linhas; linha++) {
         for (int coluna = 0; coluna < matriz->quantidade_linhas; coluna++) {
             int soma = produtoInternoLinhas(matriz, linha, coluna);
@@ -134,10 +130,7 @@ bool construirSimilaridadeCSR(
         return false;
     }
 
-    if (!multiplicarCSRPorTransposta(
-            &compras,
-            &similaridade->intersecoes
-        )) {
+    if (!multiplicarCSRPorTransposta(&compras, &similaridade->intersecoes)) {
         return false;
     }
 
@@ -161,8 +154,7 @@ bool obterValorCSR(
     if (matriz == NULL || valor == NULL || linha < 0 || coluna < 0 ||
         linha >= matriz->quantidade_linhas ||
         coluna >= matriz->quantidade_colunas ||
-        matriz->row_ptr.size() !=
-            (size_t)matriz->quantidade_linhas + 1) {
+        matriz->row_ptr.size() != (size_t)matriz->quantidade_linhas + 1) {
         return false;
     }
 
@@ -236,10 +228,6 @@ int encontrarSimilarCSR(
     int melhor_cliente = -1;
     int maior_intersecao = -1;
 
-    /*
-     * Para um cliente fixo, minimizar 1 - intersecao/quantidade equivale a
-     * maximizar a intersecao. Somente vizinhos presentes no CSR sao visitados.
-     */
     for (int indice = inicio; indice < fim; indice++) {
         int candidato = similaridade->intersecoes.col_index[indice];
         int intersecao = similaridade->intersecoes.values[indice];

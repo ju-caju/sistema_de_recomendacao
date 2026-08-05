@@ -8,7 +8,7 @@
 #include <time.h>
 #include <vector>
 
-#define REPETICOES_BENCHMARK 3
+#define REPETICOES_BENCHMARK 1
 #define TOLERANCIA_SIMILARIDADE 0.000000001
 
 static bool converterInteiroPositivo(const char *texto, int *valor) {

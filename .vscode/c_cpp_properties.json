@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/Users/João Gabriel/anaconda3/include",
+                "C:/Users/João Gabriel/anaconda3/Lib/site-packages/pybind11/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:\\MinGW\\bin\\gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "windows-gcc-x86",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
+    ],
+    "version": 4
+}

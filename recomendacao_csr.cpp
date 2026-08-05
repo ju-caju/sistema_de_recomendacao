@@ -26,13 +26,12 @@ std::vector<int> recomendarProdutosCSR(
     int n_produtos = (int)lista->nomes_produtos.size();
     std::vector<ProdutoRank> ranking(n_produtos);
     std::vector<char> cliente_ja_comprou(n_produtos, 0);
-    std::list<int> compras_cliente = lista->compras_clientes[cliente_idx];
 
     for (int produto = 0; produto < n_produtos; produto++) {
         ranking[produto].id_produto = produto;
         ranking[produto].rank = 1.0;
     }
-
+    std::list<int> compras_cliente = lista->compras_clientes[cliente_idx];
     while (!compras_cliente.empty()) {
         cliente_ja_comprou[compras_cliente.front()] = 1;
         compras_cliente.pop_front();
@@ -45,25 +44,24 @@ std::vector<int> recomendarProdutosCSR(
         int vizinho = similaridade->intersecoes.col_index[indice];
 
         if (vizinho != cliente_idx) {
-            double distancia;
+            int intersecao = similaridade->intersecoes.values[indice];
+            int total_compras = similaridade->quantidade_compras[cliente_idx];
 
-            if (obterSimilaridadeCSR(
-                    similaridade,
-                    cliente_idx,
-                    vizinho,
-                    &distancia
-                ) && distancia < 1.0) {
-                std::list<int> compras_vizinho =
-                    lista->compras_clientes[vizinho];
+            if (total_compras > 0) {
+                double distancia = 1.0 - (double)intersecao / total_compras;
 
-                while (!compras_vizinho.empty()) {
-                    int produto = compras_vizinho.front();
+                if (distancia < 1.0) {
+                    std::list<int> compras_vizinho = lista->compras_clientes[vizinho];
 
-                    if (!cliente_ja_comprou[produto]) {
-                        ranking[produto].rank *= distancia;
+                    while (!compras_vizinho.empty()) {
+                        int produto = compras_vizinho.front();
+
+                        if (!cliente_ja_comprou[produto]) {
+                            ranking[produto].rank *= distancia;
+                        }
+
+                        compras_vizinho.pop_front();
                     }
-
-                    compras_vizinho.pop_front();
                 }
             }
         }
