@@ -11,11 +11,11 @@
 #include <vector>
 
 static bool montarListaCompras(
-    std::vector<std::vector<int> > compras,
+    const std::vector<std::vector<int> > &compras,
     int quantidade_produtos,
     ListaCompras *lista
 ) {
-    if (lista == NULL || quantidade_produtos < 0) {
+    if (lista == NULL || quantidade_produtos <= 0 || compras.empty()) {
         return false;
     }
 
@@ -24,6 +24,7 @@ static bool montarListaCompras(
     lista->nomes_produtos.clear();
     lista->indices_produtos.clear();
     lista->compras_clientes.clear();
+
     lista->codigos_clientes.resize(compras.size());
     lista->nomes_produtos.resize(quantidade_produtos);
     lista->compras_clientes.resize(compras.size());
@@ -31,29 +32,13 @@ static bool montarListaCompras(
     for (size_t cliente = 0; cliente < compras.size(); cliente++) {
         for (size_t indice = 0; indice < compras[cliente].size(); indice++) {
             int produto = compras[cliente][indice];
-
-            if (produto < 0 || produto >= quantidade_produtos) {
-                return false;
-            }
-
-            std::list<int> existentes = lista->compras_clientes[cliente];
-            bool repetido = false;
-
-            while (!existentes.empty()) {
-                if (existentes.front() == produto) {
-                    repetido = true;
-                    break;
-                }
-                existentes.pop_front();
-            }
-
-            if (!repetido) {
+            if (produto >= 0 && produto < quantidade_produtos) {
                 lista->compras_clientes[cliente].push_back(produto);
             }
         }
     }
 
-    return !compras.empty() && quantidade_produtos > 0;
+    return true;
 }
 
 static std::vector<std::vector<double> > calcularSimilaridadePython(

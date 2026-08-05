@@ -1,9 +1,9 @@
 import csv
-from pathlib import Path
+import os
 
 
 def _detectar_separador(caminho):
-    with caminho.open("r", encoding="utf-8-sig", newline="") as arquivo:
+    with open(caminho, "r", encoding="utf-8-sig", newline="") as arquivo:
         cabecalho = arquivo.readline()
 
     if ";" in cabecalho:
@@ -12,7 +12,7 @@ def _detectar_separador(caminho):
 
 
 def _linhas_csv(caminho, separador):
-    with caminho.open("r", encoding="utf-8-sig", newline="") as arquivo:
+    with open(caminho, "r", encoding="utf-8-sig", newline="") as arquivo:
         leitor = csv.reader(arquivo, delimiter=separador)
         cabecalho = next(leitor, None)
         if cabecalho is None or len(cabecalho) < 4:
@@ -20,15 +20,16 @@ def _linhas_csv(caminho, separador):
 
         for campos in leitor:
             if len(campos) >= 4:
-                yield [campo.strip() for campo in campos]
+                # Junta vírgulas extras no nome do produto para evitar truncamento
+                nome_produto = separador.join(campos[3:]).strip()
+                yield [campos[0].strip(), campos[1].strip(), campos[2].strip(), nome_produto]
 
 
 def ler_arquivo(caminho_arquivo):
-    caminho = Path(caminho_arquivo)
-    if not caminho.is_file():
-        raise FileNotFoundError(f"Arquivo CSV nao encontrado: {caminho}")
+    if not os.path.isfile(caminho_arquivo):
+        raise FileNotFoundError(f"Arquivo CSV nao encontrado: {caminho_arquivo}")
 
-    separador = _detectar_separador(caminho)
+    separador = _detectar_separador(caminho_arquivo)
     dados = {
         "vetor_clientes": [],
         "mapa_clientes": {},
@@ -39,7 +40,7 @@ def ler_arquivo(caminho_arquivo):
     }
 
     # Primeira fase: cria os indices internos.
-    for campos in _linhas_csv(caminho, separador):
+    for campos in _linhas_csv(caminho_arquivo, separador):
         codigo_cliente = campos[1]
         codigo_produto = campos[2]
         nome_produto = campos[3]
@@ -57,7 +58,7 @@ def ler_arquivo(caminho_arquivo):
             dados["nomes_produtos"].append(nome_produto)
 
     # Segunda fase: preenche as compras sem duplicatas.
-    for campos in _linhas_csv(caminho, separador):
+    for campos in _linhas_csv(caminho_arquivo, separador):
         codigo_cliente = campos[1]
         codigo_produto = campos[2]
         indice_cliente = dados["mapa_clientes"][codigo_cliente]
