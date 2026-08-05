@@ -1,16 +1,22 @@
+from pathlib import Path
+
 from setuptools import setup
 from pybind11.setup_helpers import Pybind11Extension, build_ext
+
+diretorio_integracao = Path(__file__).resolve().parent
+diretorio_raiz = diretorio_integracao.parent
 
 ext_modules = [
     Pybind11Extension(
         "sistema_recomendacao",
         [
-            "bindings.cpp",
-            "similaridade.cpp",
-            "recomendacao.cpp",
-            "recomendacao_csr.cpp",
-            "csr.cpp",
+            str(diretorio_integracao / "bindings.cpp"),
+            str(diretorio_raiz / "similaridade.cpp"),
+            str(diretorio_raiz / "recomendacao.cpp"),
+            str(diretorio_raiz / "recomendacao_csr.cpp"),
+            str(diretorio_raiz / "csr.cpp"),
         ],
+        include_dirs=[str(diretorio_raiz)],
         cxx_std=11,
     )
 ]

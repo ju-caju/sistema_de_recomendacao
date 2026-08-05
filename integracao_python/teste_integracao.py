@@ -3,7 +3,8 @@ import leitura_compras
 import sistema_recomendacao
 
 diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-caminho_dados = os.path.join(diretorio_atual, "dados", "teste_regressao.csv")
+diretorio_dados = os.path.join(diretorio_atual, "..", "dados")
+caminho_dados = os.path.join(diretorio_dados, "teste_regressao.csv")
 
 dados = leitura_compras.ler_arquivo(caminho_dados)
 compras = dados["lista_compras"]
@@ -14,7 +15,9 @@ assert len(dados["vetor_produtos"]) == 4
 assert len(compras[0]) == 2
 assert dados["nomes_produtos"][0] == "Produto, Um"
 
-caminho_ponto_virgula = os.path.join(diretorio_atual, "dados", "teste_regressao_ponto_virgula.csv")
+caminho_ponto_virgula = os.path.join(
+    diretorio_dados, "teste_regressao_ponto_virgula.csv"
+)
 dados_ponto_virgula = leitura_compras.ler_arquivo(caminho_ponto_virgula)
 assert len(dados_ponto_virgula["vetor_clientes"]) == 2
 assert len(dados_ponto_virgula["vetor_produtos"]) == 2
