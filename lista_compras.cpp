@@ -129,7 +129,6 @@ bool carregarListaCompras(ListaCompras *lista, const char *caminho_arquivo) {
     limparListaCompras(lista);
     char separador = detectarSeparador(linha);
 
-    /* Primeira fase: cria os indices internos de clientes e produtos. */
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
         std::string texto_linha = linha;
         std::vector<std::string> campos = separarCampos(&texto_linha, separador);
@@ -150,7 +149,6 @@ bool carregarListaCompras(ListaCompras *lista, const char *caminho_arquivo) {
         return false;
     }
 
-    /* Segunda fase: preenche as listas sem repetir o mesmo produto. */
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
         std::string texto_linha = linha;
         std::vector<std::string> campos = separarCampos(&texto_linha, separador);

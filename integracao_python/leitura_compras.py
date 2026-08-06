@@ -20,7 +20,6 @@ def _linhas_csv(caminho, separador):
 
         for campos in leitor:
             if len(campos) >= 4:
-                # Junta vírgulas extras no nome do produto para evitar truncamento
                 nome_produto = separador.join(campos[3:]).strip()
                 yield [campos[0].strip(), campos[1].strip(), campos[2].strip(), nome_produto]
 
@@ -39,7 +38,6 @@ def ler_arquivo(caminho_arquivo):
         "lista_compras": [],
     }
 
-    # Primeira fase: cria os indices internos.
     for campos in _linhas_csv(caminho_arquivo, separador):
         codigo_cliente = campos[1]
         codigo_produto = campos[2]
@@ -57,7 +55,6 @@ def ler_arquivo(caminho_arquivo):
             dados["vetor_produtos"].append(codigo_produto)
             dados["nomes_produtos"].append(nome_produto)
 
-    # Segunda fase: preenche as compras sem duplicatas.
     for campos in _linhas_csv(caminho_arquivo, separador):
         codigo_cliente = campos[1]
         codigo_produto = campos[2]

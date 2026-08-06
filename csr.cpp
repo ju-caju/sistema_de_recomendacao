@@ -62,7 +62,6 @@ bool construirMatrizComprasCSR(
     matriz->row_ptr.push_back(0);
 
     for (int cliente = 0; cliente < quantidade_clientes; cliente++) {
-        // Cópia e ordenação via std::list conforme estrutura apresentada no PDF[cite: 6]
         std::list<int> compras = lista->compras_clientes[cliente];
         std::vector<int> produtos;
 

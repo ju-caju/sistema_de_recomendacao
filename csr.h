@@ -5,11 +5,6 @@
 
 #include <vector>
 
-/*
- * Representacao Compressed Sparse Row. Em cada linha, os indices de coluna
- * sao mantidos em ordem crescente para permitir o produto interno com dois
- * indices, sem construir a transposta.
- */
 typedef struct {
     int quantidade_linhas;
     int quantidade_colunas;
@@ -18,10 +13,6 @@ typedef struct {
     std::vector<int> row_ptr;
 } MatrizCSR;
 
-/*
- * A distancia igual a 1 nao precisa ser armazenada. Ela e obtida sob demanda
- * a partir da matriz esparsa de intersecoes e da quantidade de compras.
- */
 typedef struct {
     MatrizCSR intersecoes;
     std::vector<int> quantidade_compras;
