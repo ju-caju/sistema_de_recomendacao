@@ -1,15 +1,44 @@
 # Sistema de Recomendacao
 
-Projeto procedural em C++11 que organiza o historico de compras, calcula a
-distancia entre clientes e recomenda produtos. A Atividade 4 acrescenta uma
-multiplicacao eficiente da matriz de compras por sua transposta e um benchmark
-comparativo com o algoritmo padrao.
+Sistema de recomendacao que organiza historicos de compra, calcula a distancia
+entre clientes e sugere produtos. O repositorio preserva as seis atividades do
+projeto original em C++11 e Python e inclui uma interface web para uso direto no
+navegador.
 
 O codigo segue o estilo procedural da linguagem C. O compilador C++ e usado
 somente porque a especificacao permite as estruturas `vector`, `string`, `map`
 e `list`, alem dos algoritmos `find` e `sort` da STL. A implementacao nao usa
 classes proprias, referencias, iteradores, lacos baseados em intervalo ou
 outros recursos exclusivos de C++ fora dessas excecoes.
+
+## Estrutura
+
+```text
+dados/               bases CSV e casos pequenos de regressao
+integracao_python/   leitura CSV em Python e bindings pybind11
+frontend/            interface web responsiva
+*.cpp e *.h          modulos e testadores das atividades em C++
+testes.cpp           testes de regressao do nucleo C++
+```
+
+Executaveis e configuracoes pessoais de editores nao fazem parte do repositorio.
+O `Makefile` gera todos os binarios dentro de `bin/`.
+
+## Interface web
+
+O frontend aceita os mesmos CSVs do projeto. Ele mostra um resumo da base,
+permite selecionar um cliente, calcula produtos recomendados e exporta a lista
+em CSV. O processamento ocorre no navegador e o arquivo carregado nao e enviado
+para um servidor.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Abra `http://localhost:3000`. A interface tambem possui uma base pequena de
+demonstracao, por isso funciona mesmo sem carregar um arquivo.
 
 ## Compilacao
 

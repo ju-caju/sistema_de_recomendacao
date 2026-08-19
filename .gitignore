@@ -1,5 +1,10 @@
 bin/
 testador
+*.exe
+*.o
+.vscode/
+.venv/
+.pytest_cache/
 integracao_python/build/
 integracao_python/*.so
 integracao_python/*.pyd
